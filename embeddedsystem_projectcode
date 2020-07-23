@@ -1,0 +1,74 @@
+//Declaration
+//LIGHT SENSOR
+const int ledPin2 = 13;   //the number of the 2 LED pin
+const int ldrPin = A0;    //the number of the LDR pin
+
+//ULTRASONIC SENSOR
+const int trigPin = 9;    //the number of the trigger pin
+const int echoPin = 10;   //the number of the echo pin
+const int ledPin4 = 11;   //the number of the 4 LED pin
+long duration;
+int distance;
+int safetyDistance;
+
+//TOUCH SENSOR
+#define ctsPin 2 
+const int buzzer = 12;
+
+void setup() {
+
+  Serial.begin(9600);
+  //LIGHT SENSOR
+  pinMode(ledPin2, OUTPUT);  // Sets the 2 LED pin as an Output
+  pinMode(ldrPin, INPUT);   // Sets the LDR pin as an Input
+  
+  //ULTRASONIC SENSOR
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  pinMode(ledPin4, OUTPUT); // Sets the 4 LED pin as an Output
+
+  //TOUCH SENSOR
+  pinMode(buzzer, OUTPUT);  // Sets the buzzer as an Output
+  pinMode(ctsPin, INPUT);   // Sets the ctsPin as an Input
+}
+
+void loop() {
+
+  //LIGHT SENSOR
+  int ldrStatus = analogRead(ldrPin);   //read the status of the LDR value
+   if (ldrStatus <=100) //LED is HIGH if the LDR status is <=100
+    digitalWrite(ledPin2, HIGH);  //turn LED on
+  else 
+    digitalWrite(ledPin2, LOW);   //turn LED off
+
+  //ULTRASONIC SENSOR
+  digitalWrite(trigPin, LOW);    // Clears the trigPin
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);   
+  delayMicroseconds(10);  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, LOW);
+ 
+  duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds
+  distance= duration*0.034/2; // Calculating the distance
+
+  safetyDistance = distance;
+  if (safetyDistance <= 5 && ldrStatus <=100) // Activate 4 led only at night
+    digitalWrite(ledPin4, HIGH);
+  else
+    digitalWrite(ledPin4, LOW);
+
+  //TOUCH SENSOR
+  int ctsValue = digitalRead(ctsPin); 
+      if (ctsValue == HIGH && safetyDistance <= 5) // Activate buzzer when there's something at blindspot
+        {  
+           digitalWrite(buzzer, HIGH);  
+           Serial.println("TOUCHED");
+           }  
+     else
+        {    
+         digitalWrite(buzzer,LOW);
+             Serial.println("not touched"); 
+          }  
+      delay(0.9); 
+}
